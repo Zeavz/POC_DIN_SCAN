@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-sensor-manager" version="0.0.1">
+    <name>Device</name>
+    <description>Cordova Sensor Manager Plugin</description>
+    <license>MIT</license>
+    <keywords>cordova,device,sensors</keywords>
+    
+    <js-module name="AndroidSensorManager" src="www/sensorManager.js">
+        <clobbers target="cordova.plugins.sensorManager" />
+    </js-module>
+    <engines>
+        <engine name="cordova" version=">=3.6.0"></engine>
+    </engines>
+    <platform name="android">
+        <source-file src="src/android/com/codingsans/ionic/sensormanager/AndroidSensorManager.java" target-dir="src/com/codingsans/ionic/sensormanager"/>
+        <source-file src="src/android/com/codingsans/ionic/sensormanager/CameraScreenFrag.java" target-dir="src/com/codingsans/ionic/sensormanager" />
+        <source-file src="src/android/com/codingsans/ionic/sensormanager/camera_view_screen.xml" target-dir="res/layout" />
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="AndroidSensorManager">
+                <param name="android-package" value="com.codingsans.ionic.sensormanager.AndroidSensorManager" />
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
+
+        <framework src="com.google.android.gms:play-services-vision:15.0.2" />
+        <framework src="com.android.volley:volley:1.1.0" />
+    </platform>
+</plugin>
