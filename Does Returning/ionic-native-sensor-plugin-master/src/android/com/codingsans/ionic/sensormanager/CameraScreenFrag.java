@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 //Vision Stuff
 
 //Camera Stuff
+import android.graphics.Point;
 import android.view.SurfaceView;
 import android.widget.TextView;
 import android.widget.Button;
@@ -42,36 +43,27 @@ public class CameraScreenFrag extends Fragment{
     String appResourcesPackage;
     SurfaceView cameraView;
     TextView textView;
-    public String dinNumber = "12345678";
+    public String dinNumber = "";
     CameraSource cameraSource;
     final int RequestCameraPermissionID = 1001;
     boolean hide = true;
+    boolean firstTime = true;
     String url = "https://health-products.canada.ca/api/drug/drugproduct/?lang=en&type=json&din=";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
         appResourcesPackage = getActivity().getPackageName();  
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-            final android.widget.Toast toast = android.widget.Toast.makeText(
-              getActivity().getWindow().getContext(),
-              "I am inside the camera fragment",
-              android.widget.Toast.LENGTH_LONG 
-                );
-                toast.show();
-            }
-        });
         viewer = inflater.inflate(getResources().getIdentifier("camera_view_screen", "layout", appResourcesPackage), container, false);
         setUpCameraScreen();
         return viewer;
     }
 
-    protected void apiCall(String id){
+    protected void apiCall(String id, Point[] points){
 
         String tempUrl = url + id.substring(4);
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity().getWindow().getContext());
-
+        final Point[] pointsToSend = points;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, tempUrl,
                 new Response.Listener<String>() {
                     @Override
@@ -80,22 +72,13 @@ public class CameraScreenFrag extends Fragment{
                             try{
                                 JSONArray objarr = new JSONArray(response.toString());
                                 JSONObject obj = objarr.getJSONObject(0);
-                                String toOutput = obj.getString("brand_name");
-                                dinNumber = toOutput;
+                                final String toOutputNum = obj.getString("drug_identification_number");
+                                dinNumber = toOutputNum;
+                                //showText(toOutputNum, pointsToSend[3]);
                                 // returnIntent.putExtra("result", toOutput);
                                 // returnIntent.putExtra("result2", obj.getString("drug_identification_number"));
                                 // returnIntent.putExtra("result3", obj.getString("company_name"));
                                 // returnIntent.putExtra("result4", obj.getString("descriptor"));
-                                getActivity().runOnUiThread(new Runnable() {
-                                    public void run() {
-                                    final android.widget.Toast toast = android.widget.Toast.makeText(
-                                      getActivity().getWindow().getContext(),
-                                      "Drug found: " + toOutput,
-                                      android.widget.Toast.LENGTH_LONG 
-                                        );
-                                        toast.show();
-                                    }
-                                });
                             }
                             catch (Throwable t){
                             }
@@ -112,41 +95,23 @@ public class CameraScreenFrag extends Fragment{
         requestQueue.add(stringRequest);
     }
 
+    private void showText(String dinNum, Point p1){
+        final String toDisplay = dinNum;
+        final Point pointToUse = p1;
+        getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    textView.setText(toDisplay);
+                    textView.setVisibility(View.VISIBLE);
+                    textView.setX(pointToUse.x);
+                    textView.setY(pointToUse.y);
+                }
+            });
+    }
+
     private void setUpCameraScreen(){
         cameraView = (SurfaceView) viewer.findViewById(getResources().getIdentifier("surface_view", "id", appResourcesPackage));
-        textView = (TextView) viewer.findViewById(getResources().getIdentifier("txtView", "id", appResourcesPackage));
-        Button button = (Button) viewer.findViewById(getResources().getIdentifier("btnHide", "id", appResourcesPackage));
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try{
-                    getActivity().runOnUiThread(new Runnable() {
-                        public void run() {
-                        final android.widget.Toast toast = android.widget.Toast.makeText(
-                          getActivity().getWindow().getContext(),
-                          "About to start camera...",
-                          android.widget.Toast.LENGTH_LONG 
-                            );
-                            toast.show();
-                        }
-                    });
-                    cameraSource.start(cameraView.getHolder());
-                }catch (IOException e){
-                    getActivity().runOnUiThread(new Runnable() {
-                        public void run() {
-                        final android.widget.Toast toast = android.widget.Toast.makeText(
-                          getActivity().getWindow().getContext(),
-                          "Something went wrong trying to start the cameraSource",
-                          android.widget.Toast.LENGTH_LONG 
-                            );
-                            toast.show();
-                        }
-                    });
-                }
-            }
-        });
-
+        textView = (TextView) viewer.findViewById(getResources().getIdentifier("txtView", "id", appResourcesPackage)); 
+        textView.setVisibility(View.INVISIBLE);
         TextRecognizer textRecognizer = new TextRecognizer.Builder(getActivity().getWindow().getContext()).build();
         if (!textRecognizer.isOperational()) {
             getActivity().runOnUiThread(new Runnable() {
@@ -160,6 +125,7 @@ public class CameraScreenFrag extends Fragment{
                 }
             });
         } else {
+            //if (firstTime){
             cameraSource = new CameraSource.Builder(getActivity().getWindow().getContext(), textRecognizer)
                     .setFacing(CameraSource.CAMERA_FACING_BACK)
                     .setRequestedPreviewSize(1280, 1024)
@@ -169,16 +135,6 @@ public class CameraScreenFrag extends Fragment{
             cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
                 @Override
                 public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        public void run() {
-                        final android.widget.Toast toast = android.widget.Toast.makeText(
-                          getActivity().getWindow().getContext(),
-                          "Surface created",
-                          android.widget.Toast.LENGTH_LONG 
-                            );
-                            toast.show();
-                        }
-                    });
                     try{
                         cameraSource.start(cameraView.getHolder());
                     }
@@ -207,6 +163,9 @@ public class CameraScreenFrag extends Fragment{
                     cameraSource.stop();
                 }
             });
+        // }
+        // else{
+            
 
             textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
                 @Override
@@ -218,34 +177,14 @@ public class CameraScreenFrag extends Fragment{
                 public void receiveDetections(Detector.Detections<TextBlock> detections) {
                     final SparseArray<TextBlock> items = detections.getDetectedItems();
                     if(items.size() != 0){
-                        textView.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for(int i=0;i<items.size();++i){
-                                    TextBlock item = items.valueAt(i);
-                                    stringBuilder.append(item.getValue());
-                                    stringBuilder.append("\n");
-                                    Pattern p = Pattern.compile("DIN\\s\\d{8}");
-                                    Matcher m = p.matcher(item.getValue().toString());
-                                    if (m.matches()){
-                                        Context context = getActivity().getWindow().getContext();
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            public void run() {
-                                            final android.widget.Toast toast = android.widget.Toast.makeText(
-                                              getActivity().getWindow().getContext(),
-                                              "Found DIN!" + item.getValue().toString(),
-                                              android.widget.Toast.LENGTH_SHORT 
-                                                );
-                                                toast.show();
-                                            }
-                                        });
-                                        apiCall(item.getValue().toString());
-                                    }
-                                }
-                                textView.setText(stringBuilder.toString());
+                        for(int i=0;i<items.size();++i){
+                            TextBlock item = items.valueAt(i);
+                            Pattern p = Pattern.compile("DIN.?\\d{8}");
+                            Matcher m = p.matcher(item.getValue().toString());
+                            if (m.matches()){
+                                apiCall(item.getValue().toString(), item.getCornerPoints());
                             }
-                        });
+                        }
                     }
                 }
             });

@@ -20,10 +20,13 @@ var DeviceSensorLoader = function(require, exports, module) {
     }, 500);
   };
 
+  DeviceSensor.prototype.getDin = function(success, failure) {
+    exec(success, failure, 'AndroidSensorManager', 'getDin', []);
+  }
+
   DeviceSensor.prototype.close = function(success, failure) {
-    if (intervalId) {
+    if (intervalId){
       clearInterval(intervalId);
-      intervalId = null;
     }
     exec(success, failure, 'AndroidSensorManager', 'close', []);
   };

@@ -14,23 +14,10 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         />
-
-    <TextView
-        android:id="@+id/txtView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:textSize="20dp"
-        android:textColor="@android:color/white"
-        android:text=""
-        android:background="#8000"
-        />
-
-    <Button
-        android:id="@+id/btnHide"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/txtView"
-        android:text="Hide"
-        />
+        <TextView
+          android:id="@+id/txtView"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textStyle="bold"
+          />
 </RelativeLayout>

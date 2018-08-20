@@ -34,6 +34,7 @@ public class AndroidSensorManager extends CordovaPlugin {
     private int containerViewId = 20;
     CallbackContext callbackContext2;
     FragmentTransaction fragmentTransaction;
+    String dinChecker = "";
 
     private static final String [] permissions = {
         Manifest.permission.CAMERA
@@ -90,32 +91,44 @@ public class AndroidSensorManager extends CordovaPlugin {
               //startScanner();
         }
         else if ("getDin".equals(action)){
-            data = new JSONObject();
-              try {
-                  data.put("din", frag.dinNumber);
-              } catch(JSONException e) {}
-              callbackContext.success(this.data);
-              if (!frag.dinNumber.equals("12345678")){
+              dinChecker = frag.dinNumber; 
+              if (!dinChecker.equals("")){
+                data = new JSONObject();
+                try {
+                  data.put("din", dinChecker);
+                } catch(JSONException e) {}
+                callbackContext.success(this.data);
                 cordova.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                     ((ViewGroup)webView.getView()).bringToFront();
                     }
                 });
+                frag.dinNumber = "";
                 fragmentTransaction.remove(frag).commit();
                 frag = null;
+              }
+              else{
+                data = new JSONObject();
+                try {
+                  data.put("din", dinChecker);
+                } catch(JSONException e) {}
+                callbackContext.error(this.data);
               }
               return true;
         } 
         else if ("close".equals(action)){
-            cordova.getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                ((ViewGroup)webView.getView()).bringToFront();
-                }
-            });
-            fragmentTransaction.remove(frag).commit();
-            frag = null;
+            //frag.cameraSource.stop();
+        //     if (frag != null){
+        //      cordova.getActivity().runOnUiThread(new Runnable() {
+        //             @Override
+        //             public void run() {
+        //             ((ViewGroup)webView.getView()).bringToFront();
+        //             }
+        //     });
+        //     fragmentTransaction.remove(frag);
+        //     frag = null;
+        // }
             return true;
         }
         else if ("getCurrent".equals(action)) {
@@ -144,8 +157,14 @@ public class AndroidSensorManager extends CordovaPlugin {
     };
 
     private boolean startScanner(CallbackContext callbackContext){
+        //if (cordova.getActivity()!= null && frag == null){
+        try{
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                
         frag = new CameraScreenFrag();
-
+        frag.dinNumber = "";
         FrameLayout containerView = (FrameLayout)cordova.getActivity().findViewById(containerViewId);
         if(containerView == null){
             containerView = new FrameLayout(cordova.getActivity().getApplicationContext());
@@ -153,16 +172,21 @@ public class AndroidSensorManager extends CordovaPlugin {
             FrameLayout.LayoutParams containerLayoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
             cordova.getActivity().addContentView(containerView, containerLayoutParams);
         }
-
+        containerView.bringToFront();
         FragmentManager fragmentManager = cordova.getActivity().getFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(containerView.getId(), frag);
         fragmentTransaction.commit();
-        data = new JSONObject();
-              try {
-                  data.put("din", frag.dinNumber);
-              } catch(JSONException e) {}
-        callbackContext.success(this.data);
+                }
+            });
+    }
+    catch(Exception e){
+        try {
+            data.put("errorMessage", e.toString());
+        } catch(JSONException e1) {}
+        callbackContext.error(this.data);
+    }
+//}
         return true;
     }
 }
