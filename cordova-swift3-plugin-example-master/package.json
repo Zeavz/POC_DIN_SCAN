@@ -1,0 +1,17 @@
+{
+  "name": "IOSDIN",
+  "version": "0.0.1",
+  "description": "Din POC",
+  "cordova": {
+    "id": "com-moduscreate-plugins-echoswift",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "author": "Jenis",
+  "license": "ISC"
+}
