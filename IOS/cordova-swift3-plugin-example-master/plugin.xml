@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="com-moduscreate-plugins-echoswift" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+  <name>ModusEchoSwift</name>
+
+    <engines>
+        <engine name="cordova" version=">=7.1.0"/>
+        <engine name="cordova-ios" version=">=4.4.0"/>
+    </engines>
+
+  <js-module name="ModusEchoSwift" src="www/ModusEchoSwift.js">
+    <clobbers target="modusechoswift" />
+  </js-module>
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="ModusEchoSwift">
+        <param name="ios-package" value="ModusEchoSwift" />
+      </feature>
+    </config-file>
+    <source-file src="src/ios/ModusEchoSwift.swift" />
+    <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+        <string>The camera is used to scan for a DIN number.</string>
+    </config-file>
+<!--     <pod name="GoogleMobileVision/TextDetector" />--> 
+    <pods-config ios-min-version="9.0" use-frameworks="true">
+    </pods-config>
+    <!-- <pod name="Firebase/Core" spec="~> 5.1.0"/>
+    <pod name="Firebase/MLVision" />
+    <pod name="Firebase/MLVisionTextModel" /> -->
+    <framework src="Firebase/Core" type="podspec" spec="~> 5.1.0"/>
+    <framework src="Firebase/MLVision" type="podspec" spec=""/>
+    <framework src="Firebase/MLVisionTextModel" type="podspec" spec=""/>
+  </platform>
+</plugin>
