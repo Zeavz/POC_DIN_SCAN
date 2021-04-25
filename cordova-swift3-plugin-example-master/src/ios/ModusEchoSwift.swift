@@ -499,3 +499,4 @@ class ModusEchoSwift : CDVPlugin, NSObject, AVCaptureVideoDataOutputSampleBuffer
         }
     }
 }
+print("my god what is this?!")
